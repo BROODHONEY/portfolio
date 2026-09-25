@@ -36,29 +36,6 @@ export const timelineStages = [
   },
 ] as const;
 
-export type SkillCard = {
-  category: string;
-  name: string;
-  use: string;
-  project: string;
-  x: number;
-  y: number;
-  r: number;
-};
-
-export const skills: SkillCard[] = [
-  { category: "Language", name: "Python", use: "Everything ML and backend related.", project: "AWP", x: -294, y: 44, r: -17 },
-  { category: "Language", name: "TypeScript", use: "Full-stack apps and type-safe backends.", project: "Devarcade", x: -228, y: 24, r: -13 },
-  { category: "AI & ML", name: "LangChain", use: "Chaining LLM calls into agent workflows.", project: "AWP", x: -162, y: 11, r: -9 },
-  { category: "AI & ML", name: "Agentic AI", use: "Designing systems where agents coordinate.", project: "AWP", x: -96, y: 3, r: -5 },
-  { category: "AI & ML", name: "Scikit-learn", use: "Classical models for structured prediction.", project: "AutoNav Fleet", x: -32, y: 0, r: -2 },
-  { category: "Full-Stack", name: "React", use: "Interfaces for every product I ship.", project: "Devarcade", x: 32, y: 0, r: 2 },
-  { category: "Full-Stack", name: "Node.js", use: "APIs and realtime services.", project: "Quantum Platform", x: 96, y: 3, r: 5 },
-  { category: "Data", name: "Supabase", use: "Vector storage for semantic search.", project: "AWP", x: 162, y: 11, r: 9 },
-  { category: "Cloud", name: "AWS / Azure", use: "Hosting and inference at scale.", project: "Maitri Bharati Twin", x: 228, y: 24, r: 13 },
-  { category: "Hardware", name: "ESP32", use: "Sensing and actuation for physical builds.", project: "Godhand", x: 294, y: 44, r: 17 },
-];
-
 export type Project = {
   key: string;
   title: string;

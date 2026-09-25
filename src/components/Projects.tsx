@@ -11,8 +11,15 @@ export default function Projects() {
   const previewRef = useRef<HTMLDivElement>(null);
   const previewInnerRef = useRef<HTMLDivElement>(null);
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
+  const featuredRef = useRef<HTMLDivElement>(null);
+  const previewStageRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const shown = hovered ?? projects[0];
+  const featured = projects.find((p) => p.key === "awp") ?? projects[0];
+  const rest = projects.filter((p) => p.key !== featured.key);
+  const shown = hovered ?? rest[0];
 
   const closeOverlay = () => {
     setOverlayVisible(false);
@@ -52,6 +59,44 @@ export default function Projects() {
     );
   }, [shown.key]);
 
+  // entering the section: the label fades up, the featured project unrolls
+  // like a sheet (same idea as the preview panel above), then the list
+  // falls in underneath — one coordinated reveal, not a plain fade.
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const rows = rowRefs.current.filter((r): r is HTMLDivElement => !!r);
+
+    const ctx = gsap.context(() => {
+      if (reduced) {
+        gsap.set([labelRef.current, previewStageRef.current, ...rows], { opacity: 1, y: 0 });
+        gsap.set(featuredRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
+        return;
+      }
+
+      gsap.set(labelRef.current, { opacity: 0, y: 14 });
+      gsap.set(featuredRef.current, { clipPath: "inset(100% 0% 0% 0%)" });
+      gsap.set(previewStageRef.current, { opacity: 0, y: 14 });
+      gsap.set(rows, { opacity: 0, y: 20 });
+
+      gsap
+        .timeline({ scrollTrigger: { trigger: sectionRef.current, start: "top 75%" } })
+        .to(labelRef.current, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
+        .to(
+          featuredRef.current,
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 0.8, ease: "power3.out" },
+          "-=0.25"
+        )
+        .to(
+          rows,
+          { opacity: 1, y: 0, duration: 0.55, stagger: 0.07, ease: "power3.out" },
+          "-=0.45"
+        )
+        .to(previewStageRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.5");
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const onPreviewMove = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -64,17 +109,58 @@ export default function Projects() {
   };
 
   return (
-    <section id="projects">
+    <section id="projects" ref={sectionRef}>
       <div className="col-grid">
-        <div className="section-label">
-          Projects
+        <div className="section-label" ref={labelRef}>
+          Works
+        </div>
+
+        <div
+          className="proj-featured"
+          ref={featuredRef}
+          style={
+            {
+              "--proj-accent": featured.accent,
+              "--proj-accent2": featured.accent2,
+            } as CSSProperties
+          }
+          data-cursor="view"
+          data-cursor-accent={featured.accent}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${featured.title} case study`}
+          onClick={() => openOverlay(featured)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openOverlay(featured);
+            }
+          }}
+        >
+          <div className="pf-wash" />
+          <div className="pf-body">
+            <div className="pf-meta mono">Featured Work — {featured.tag}</div>
+            <h3 className="pf-title">{featured.title}</h3>
+            <p className="pf-caption">{featured.caption}</p>
+            <div className="pf-cta mono">
+              View case study <span className="pf-arrow">→</span>
+            </div>
+          </div>
+          <div className="pf-diagram">
+            <svg>
+              <use href={`#${featured.diagram}`} />
+            </svg>
+          </div>
         </div>
 
         <div className="proj-cols">
           <div className="proj-list" onMouseLeave={() => setHovered(null)}>
-            {projects.map((p) => (
+            {rest.map((p, i) => (
               <div
                 key={p.key}
+                ref={(el) => {
+                  rowRefs.current[i] = el;
+                }}
                 className="proj-row"
                 data-cursor="view"
                 data-cursor-accent={p.accent}
@@ -100,6 +186,7 @@ export default function Projects() {
 
           <div
             className="preview-stage"
+            ref={previewStageRef}
             style={
               {
                 "--proj-accent": shown.accent,

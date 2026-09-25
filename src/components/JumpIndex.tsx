@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ScrollTrigger from "gsap/ScrollTrigger";
 import { scrollToSection } from "@/lib/useSmoothScroll";
 
 const targets = [
   { id: "hero", label: "Top" },
   { id: "about", label: "About" },
-  { id: "stack", label: "Stack" },
-  { id: "projects", label: "Projects" },
+  { id: "projects", label: "Works" },
   { id: "connect", label: "Connect" },
 ];
 
@@ -30,18 +30,31 @@ export default function JumpIndex() {
     const update = () => {
       raf = 0;
       const vh = window.innerHeight;
-      // a section counts as "in progress" once its top passes the screen's midpoint
-      const probe = window.scrollY + vh * 0.5;
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - vh;
       let current = targets[0].id;
 
-      targets.forEach((t, i) => {
+      // Pinned sections (hero, about) are wrapped in a stationary pin-spacer;
+      // measure that, since the pinned element itself moves while pinned.
+      const starts = targets.map((t) => {
         const el = document.getElementById(t.id);
+        if (!el) return 0;
+        if (t.id === "hero") return 0;
+        const box = el.closest(".pin-spacer") ?? el;
+        return box.getBoundingClientRect().top + y;
+      });
+
+      // each line spans from its section's start to the next one's, and the
+      // last one runs to the bottom of the page, so the lines together track
+      // the same scroll position as the top progress bar
+      targets.forEach((t, i) => {
         const fill = fillRefs.current[i];
-        if (!el || !fill) return;
-        const top = el.getBoundingClientRect().top + window.scrollY;
-        const p = Math.min(1, Math.max(0, (probe - top) / el.offsetHeight));
+        if (!fill) return;
+        const start = starts[i];
+        const end = i < targets.length - 1 ? starts[i + 1] : max;
+        const p = end > start ? Math.min(1, Math.max(0, (y - start) / (end - start))) : y >= start ? 1 : 0;
         fill.style.transform = `scaleY(${p})`;
-        if (probe >= top) current = t.id;
+        if (y + vh * 0.5 >= start) current = t.id;
       });
 
       if (current !== lastActive) {
@@ -57,9 +70,11 @@ export default function JumpIndex() {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    ScrollTrigger.addEventListener("refresh", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      ScrollTrigger.removeEventListener("refresh", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);

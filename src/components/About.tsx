@@ -102,7 +102,9 @@ export default function About() {
         scale: gsap.utils.interpolate(1, scaleTarget, shrinkP),
         x: gsap.utils.interpolate(0, targetX, shrinkP),
         y: gsap.utils.interpolate(0, targetY, shrinkP),
-        color: gsap.utils.interpolate("#0a0a0a", "#6b6b6b", shrinkP),
+        // driven as a CSS custom property (not a hardcoded hex) so the
+        // ink/ink-dim mix stays correct if the theme changes underneath it
+        "--shrink-p": shrinkP,
       });
 
       // rail fades in as the title settles
