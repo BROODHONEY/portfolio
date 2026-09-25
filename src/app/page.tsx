@@ -29,8 +29,9 @@ export default function Home() {
       <Hero />
       <About />
       <Projects />
-      <Connect />
-      <Footer />
+      <Footer>
+        <Connect />
+      </Footer>
 
       <JumpIndex />
     </>
