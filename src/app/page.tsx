@@ -13,6 +13,9 @@ import About from "@/components/About";
 import Projects from "@/components/Projects";
 import Connect from "@/components/Connect";
 import Footer from "@/components/Footer";
+import Drop from "@/components/Drop";
+import PageTransition from "@/components/PageTransition";
+import EditorGutter from "@/components/EditorGutter";
 
 export default function Home() {
   useSmoothScroll();
@@ -33,7 +36,10 @@ export default function Home() {
         <Connect />
       </Footer>
 
+      <Drop />
       <JumpIndex />
+      <EditorGutter />
+      <PageTransition />
     </>
   );
 }

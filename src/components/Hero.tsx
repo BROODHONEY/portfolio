@@ -97,6 +97,8 @@ export default function Hero() {
             <span>AI Engineer</span>
             <span>/</span>
             <span>Software Engineer</span>
+            <span>/</span>
+            <span>Web Developer</span>
           </div>
           <div className="hero-quote" ref={quoteRef}>
             I build systems that make <span>machines act</span>.

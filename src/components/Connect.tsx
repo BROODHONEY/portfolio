@@ -17,29 +17,19 @@ export default function Connect() {
         return;
       }
 
+      // The content slides down from above as the page scrolls it into view (scrubbed,
+      // so it moves with the wheel), and settles into place. Each piece a little later
+      // than the one before.
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: sectionRef.current, start: "top 88%", end: "top 4%", scrub: 1 },
+      });
+      tl.fromTo(".invite", { y: -130, opacity: 0 }, { y: 0, opacity: 1, ease: "power3.out", duration: 1 }, 0);
       gsap.utils.toArray<HTMLElement>(".connect-title-inner").forEach((el, i) => {
-        gsap.to(el, {
-          y: "0%",
-          duration: 0.85,
-          ease: "power4.out",
-          delay: i * 0.1,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 70%" },
-        });
+        // y is zeroed too: the CSS starting transform (translateY(100%)) is read by GSAP as pixels
+        tl.fromTo(el, { y: 0, yPercent: -125 }, { y: 0, yPercent: 0, ease: "power3.out", duration: 1 }, 0.12 + i * 0.12);
       });
-
-      gsap.utils.toArray<HTMLElement>(".connect-fade").forEach((el, i) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 14 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            delay: i * 0.05,
-            scrollTrigger: { trigger: sectionRef.current, start: "top 65%" },
-          }
-        );
-      });
+      tl.fromTo(".connect-meta", { y: -110, opacity: 0 }, { y: 0, opacity: 1, ease: "power3.out", duration: 1 }, 0.3);
+      tl.fromTo(".mail-line", { y: -110, opacity: 0 }, { y: 0, opacity: 1, ease: "power3.out", duration: 1 }, 0.4);
     }, sectionRef);
 
     return () => ctx.revert();

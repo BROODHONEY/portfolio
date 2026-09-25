@@ -9,6 +9,22 @@ gsap.registerPlugin(ScrollTrigger);
 
 let lenisInstance: Lenis | null = null;
 
+// The page-transition sheet registers itself here. With it in place, jumping to a
+// section is: cover the page, jump instantly underneath, uncover.
+type PageTransition = (id: string, jump: () => void) => void;
+let pageTransition: PageTransition | null = null;
+export function registerPageTransition(fn: PageTransition | null) {
+  pageTransition = fn;
+}
+
+function jumpTo(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const y = id === "hero" ? 0 : el.getBoundingClientRect().top + window.scrollY;
+  if (lenisInstance) lenisInstance.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo(0, y);
+}
+
 /**
  * Smooth-scrolls to a section by id. "hero" always goes to the very top:
  * the hero is pinned, so the browser's own #hero anchor jump lands on
@@ -18,6 +34,10 @@ export function scrollToSection(id: string, reduced = false) {
   const el = document.getElementById(id);
   const top = id === "hero" ? 0 : el;
   if (top === null || top === undefined) return;
+  if (pageTransition && !reduced) {
+    pageTransition(id, () => jumpTo(id));
+    return;
+  }
   if (lenisInstance && !reduced) {
     const targetY = typeof top === "number" ? top : top.getBoundingClientRect().top + window.scrollY;
     // longer trips take longer, so the travel always reads as an animation
